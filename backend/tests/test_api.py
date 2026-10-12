@@ -34,6 +34,7 @@ def test_dashboard_endpoint_returns_verified_kpis(client):
     assert body["kpis"]["total_sales"] == 278312.01
     assert body["kpis"]["total_profit"] == 27147.41
     assert body["applied_filters"]["regions"] == []
+    assert body["profitability"]["kpis"]["high_discount_sales_share"] == 30.42
 
 
 def test_dashboard_rejects_invalid_date_range(client):

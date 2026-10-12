@@ -66,6 +66,49 @@ class StateResponse(BaseModel):
     unique_orders: int
 
 
+class ProfitabilityKPIResponse(BaseModel):
+    furniture_sales: float
+    furniture_profit: float
+    furniture_margin: float | None
+    high_discount_sales_share: float | None
+    top_10_loss_share: float | None
+
+
+class DiscountBandResponse(BaseModel):
+    discount_band: str
+    sales: float
+    profit: float
+    profit_margin: float | None
+    line_items: int
+    loss_line_items: int
+    loss_line_share: float | None
+
+
+class ProfitabilitySubcategoryResponse(BaseModel):
+    subcategory: str
+    sales: float
+    profit: float
+    profit_margin: float | None
+    average_discount: float | None
+    low_discount_profit: float
+    high_discount_profit: float
+
+
+class ProfitabilityStateResponse(BaseModel):
+    state: str
+    sales: float
+    profit: float
+    profit_margin: float | None
+    average_discount: float | None
+
+
+class ProfitabilityResponse(BaseModel):
+    kpis: ProfitabilityKPIResponse
+    discount_bands: list[DiscountBandResponse]
+    subcategories: list[ProfitabilitySubcategoryResponse]
+    states: list[ProfitabilityStateResponse]
+
+
 class DashboardResponse(BaseModel):
     # همه بخش‌های پاسخ باید از یک DataFrame فیلترشده بیایند تا اعداد نمودارها با KPIها سازگار باشند.
     applied_filters: DashboardFilters
@@ -76,6 +119,7 @@ class DashboardResponse(BaseModel):
     subcategories: list[SubcategoryResponse]
     regions: list[RegionResponse]
     states: list[StateResponse]
+    profitability: ProfitabilityResponse
 
 
 class StateMetadata(BaseModel):

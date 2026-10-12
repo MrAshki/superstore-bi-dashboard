@@ -10,7 +10,7 @@ import { resolveMonthlyObservations, type MonthlyObservation } from "@/lib/month
 import { Filters } from "./filters";
 import { Numeric } from "./charts";
 import { Reports } from "./reports";
-import { Geography, Overview, Products, type AnnualComparison, type ViewId } from "./views";
+import { Geography, Overview, Products, Profitability, type AnnualComparison, type ViewId } from "./views";
 
 export function Dashboard() {
   const [language,setLanguage]=useState<Language>("fa");
@@ -109,12 +109,12 @@ export function Dashboard() {
       </div>
     </header>
     {metadata&&<Filters metadata={metadata} draft={draft} applied={applied} setDraft={setDraft} apply={()=>void load(draft)} reset={()=>{const reset=freshFilters();setDraft(reset);void load(reset,!metadata);}} busy={disabled} t={t}/>}
-    <nav className="tabs" aria-label={t.title}>{(["overview","products","geography"] as const).map(tab=><button key={tab} className={view===tab?"active":""} aria-current={view===tab?"page":undefined} onClick={()=>setView(tab)}>{t[tab]}</button>)}</nav>
+    <nav className="tabs" aria-label={t.title}>{(["overview","products","profitability","geography"] as const).map(tab=><button key={tab} className={view===tab?"active":""} aria-current={view===tab?"page":undefined} onClick={()=>setView(tab)}>{t[tab]}</button>)}</nav>
     {exportError&&<p className="error-banner" role="alert">{t.exportFailed}</p>}
     {images.length>0&&<section className="download-panel" aria-label={t.reportReady}><p>{t.exportDone}</p>{images.map(image=><a className="button" key={image.filename} href={image.url} download={image.filename}>{t.download} <bdi dir="ltr">{image.filename}</bdi></a>)}</section>}
     {loading?<div className="loading" role="status"><p>{t.loading}</p><div className="skeleton-kpis">{Array.from({length:4},(_,i)=><div key={i}/>)}</div></div>:error?<div className="error-banner" role="alert"><p>{t.error}</p><button className="button" onClick={()=>void load(draft,true)}><RefreshCw size={16} aria-hidden/>{t.retry}</button></div>:data&&<>
       {annualError&&<p className="error-banner" role="alert">{t.findingError} <button className="button" onClick={()=>void load(applied)}>{t.retry}</button></p>}
-      {view==="overview"?<Overview data={data} monthly={monthly} baseline={isBaseline(applied)} annual={annual} t={t}/>:view==="products"?<Products data={data} t={t}/>:<Geography key={filterKey(applied)} data={data} baseline={isBaseline(applied)} t={t}/>}
+      {view==="overview"?<Overview data={data} monthly={monthly} baseline={isBaseline(applied)} annual={annual} t={t}/>:view==="products"?<Products data={data} t={t}/>:view==="profitability"?<Profitability data={data} t={t}/>:<Geography key={filterKey(applied)} data={data} baseline={isBaseline(applied)} t={t}/>}
       <footer className="page-footer">{t.source}: <bdi dir="ltr">superstore-sales.csv</bdi> · <Numeric>{data.filtered_rows.toLocaleString("en-US")}</Numeric> {t.observations}</footer>
       {metadata&&<Reports data={data} monthly={monthly} filters={applied} metadata={metadata} language={language} annual={annual}/>}
     </>}

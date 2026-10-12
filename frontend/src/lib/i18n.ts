@@ -1,8 +1,8 @@
 import type { Language } from "./api";
 
 const en = {
-  title: "Superstore Executive Dashboard", overview: "Overview", products: "Products", geography: "Geography",
-  export: "Export report", exporting: "Preparing images…", exportDone: "Three report images are ready to save.",
+  title: "Superstore Executive Dashboard", overview: "Overview", products: "Products", geography: "Geography", profitability: "Profitability",
+  export: "Export report", exporting: "Preparing images…", exportDone: "Four report images are ready to save.",
   exportFailed: "The report could not be exported. Try again.", language: "Language",
   year: "Year", region: "Region", more: "More filters", apply: "Apply", reset: "Reset", all: "All",
   startDate: "Start Date", endDate: "End Date", segment: "Segment", category: "Category",
@@ -35,12 +35,20 @@ const en = {
   download: "Save image", reportReady: "Report images", financialNote: "All financial values are USD.",
   subcategoryNote: "{count} Sub-Categories · exact values from the selected population",
   detailSearch: "Search States", connection: "Connection", profitLegend: "Positive / negative Profit",
+  profitabilityTitle: "Furniture profitability diagnostic", furnitureSales: "Furniture Sales",
+  highDiscountShare: "Sales with Discount above 20%", lossConcentration: "Top 10 loss-line concentration",
+  discountBridge: "How Discount changes Furniture Profit", lowDiscountProfit: "Profit at 20% Discount or less",
+  highDiscountProfit: "Profit at more than 20% Discount", netFurnitureProfit: "Net Furniture Profit",
+  discountBands: "Sales and Profit by Discount band", upTo20: "Discount 20% or less", above20: "Discount above 20%",
+  lossLineShare: "Loss-making line items", discountSubcategories: "Profit by Sub-Category and Discount band",
+  stateFurnitureLosses: "Largest Furniture losses by State", averageDiscount: "Average Discount",
+  profitabilityNote: "The charts show associations in the selected order lines. They do not establish cause.",
 } as const;
 
 type Dictionary = { [K in keyof typeof en]: string };
 const fa: Dictionary = {
-  title: "داشبورد مدیریتی سوپر استور", overview: "نمای کلی", products: "محصولات", geography: "جغرافیا",
-  export: "خروجی گزارش", exporting: "آماده‌سازی تصاویر…", exportDone: "سه تصویر گزارش آمادهٔ ذخیره هستند.",
+  title: "داشبورد مدیریتی سوپر استور", overview: "نمای کلی", products: "محصولات", geography: "جغرافیا", profitability: "سودآوری",
+  export: "خروجی گزارش", exporting: "آماده‌سازی تصاویر…", exportDone: "چهار تصویر گزارش آمادهٔ ذخیره هستند.",
   exportFailed: "خروجی گزارش ساخته نشد. دوباره تلاش کنید.", language: "زبان",
   year: "سال", region: "ناحیه", more: "فیلترهای بیشتر", apply: "اعمال", reset: "بازنشانی", all: "همه",
   startDate: "تاریخ شروع", endDate: "تاریخ پایان", segment: "بخش مشتری", category: "دسته‌بندی",
@@ -73,6 +81,14 @@ const fa: Dictionary = {
   download: "ذخیرهٔ تصویر", reportReady: "تصاویر گزارش", financialNote: "تمام مقدارهای مالی با USD نمایش داده شده‌اند.",
   subcategoryNote: "{count} زیردسته · مقدارهای دقیق برای جمعیت انتخاب‌شده",
   detailSearch: "جست‌وجوی ایالت", connection: "اتصال", profitLegend: "سود مثبت / منفی",
+  profitabilityTitle: "تحلیل سودآوری Furniture", furnitureSales: "فروش Furniture",
+  highDiscountShare: "فروش با تخفیف بیشتر از ۲۰٪", lossConcentration: "تمرکز زیان در ۱۰ ردیف اول",
+  discountBridge: "اثر تخفیف بر سود Furniture", lowDiscountProfit: "سود با تخفیف ۲۰٪ یا کمتر",
+  highDiscountProfit: "سود با تخفیف بیشتر از ۲۰٪", netFurnitureProfit: "سود خالص Furniture",
+  discountBands: "فروش و سود بر اساس سطح تخفیف", upTo20: "تخفیف ۲۰٪ یا کمتر", above20: "تخفیف بیشتر از ۲۰٪",
+  lossLineShare: "ردیف‌های زیان‌ده", discountSubcategories: "سود زیردسته بر اساس سطح تخفیف",
+  stateFurnitureLosses: "بیشترین زیان Furniture بر اساس ایالت", averageDiscount: "میانگین تخفیف",
+  profitabilityNote: "نمودارها رابطه‌های موجود در ردیف‌های انتخاب‌شده را نشان می‌دهند. این رابطه‌ها علت را ثابت نمی‌کنند.",
 };
 
 export const messages = { en, fa };

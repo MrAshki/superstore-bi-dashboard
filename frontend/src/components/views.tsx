@@ -5,10 +5,10 @@ import type { DashboardResponse, State } from "@/lib/api";
 import { formatCurrency, formatNumber, formatPercent } from "@/lib/format";
 import { interpolate, type Messages } from "@/lib/i18n";
 import type { MonthlyObservation } from "@/lib/monthly";
-import { Card, Empty, Kpis, LossTable, MonthlyCharts, Numeric, ProfitComparison, StateMap, StateScatter } from "./charts";
+import { Card, DiscountBandComparison, Empty, FurnitureStateLossTable, Kpis, LossTable, MonthlyCharts, Numeric, ProfitabilityKpis, ProfitBridge, ProfitComparison, StateMap, StateScatter, SubcategoryDiscountChart } from "./charts";
 
 export type AnnualComparison = { previous: number; current: number };
-export type ViewId = "overview" | "products" | "geography";
+export type ViewId = "overview" | "products" | "profitability" | "geography";
 
 function FindingText({template,values}:{template:string;values:Record<string,string>}) {
   return <p>{template.split(/(\{\w+\})/g).map((part,index)=>{
@@ -43,6 +43,21 @@ export function Products({data,t}:{data:DashboardResponse;t:Messages}) {
     <ProfitComparison rows={rows.map(row=>({...row,name:row.subcategory}))} products t={t}/>
     <div className="series-legend"><span><i className="legend-positive"/>{t.positiveProfit}</span><span><i className="legend-negative"/>{t.loss}</span></div>
   </Card></div>;
+}
+
+export function Profitability({data,t}:{data:DashboardResponse;t:Messages}) {
+  const profitability=data.profitability;
+  if (!profitability.subcategories.length) return <div className="view-content profitability-view"><Empty t={t}/></div>;
+  return <div className="view-content profitability-view">
+    <ProfitabilityKpis data={profitability} t={t}/>
+    <div className="profitability-grid">
+      <Card title={t.discountBridge}><ProfitBridge data={profitability} t={t}/></Card>
+      <Card title={t.discountBands}><DiscountBandComparison data={profitability} t={t}/></Card>
+    </div>
+    <Card title={t.discountSubcategories}><SubcategoryDiscountChart data={profitability} t={t}/></Card>
+    <Card title={t.stateFurnitureLosses}><FurnitureStateLossTable data={profitability} t={t}/></Card>
+    <p className="chart-note profitability-note">{t.profitabilityNote}</p>
+  </div>;
 }
 
 function StateDetails({rows,t}:{rows:State[];t:Messages}) {

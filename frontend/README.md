@@ -2,7 +2,7 @@
 
 The Next.js frontend reads data through the existing FastAPI endpoints. It uses the backend totals, margins, and distinct order counts.
 
-The three views are Overview, Products, and Geography. Global filters apply after selecting Apply. Pending changes appear as chips. Reset restores the complete dataset.
+The four views are Overview, Products, Profitability, and Geography. Global filters apply after selecting Apply. Pending changes appear as chips. Reset restores the complete dataset.
 
 ## Configuration
 
@@ -35,11 +35,11 @@ Use `npm run dev` for development. On this machine, the development HMR WebSocke
 
 ## Report images
 
-Select Export report, then save each of the three PNG links. Reports use the applied filters and the current language. Pending changes do not alter the report. Fonts, plots, and map shapes are ready before capture.
+Select Export report, then save each of the four PNG links. Reports use the applied filters and the current language. Pending changes do not alter the report. Fonts, plots, and map shapes are ready before capture.
 
 The Overview report canvas is 1600 × 1400 logical pixels, rendered at 2× (3200 × 2800). Products and Geography use 1600 × 1200 (3200 × 2400). The extra Overview height keeps both monthly bar charts readable. Long filter summaries can increase the height. Reports have no menus, status messages, or tooltips.
 
-Baseline files are in `../reports`: `01-overview.png`, `02-products.png`, and `03-geography.png`.
+Baseline files are in `../reports`: `01-overview.png`, `02-products.png`, `03-profitability.png`, and `04-geography.png`.
 
 ## Data and assets
 

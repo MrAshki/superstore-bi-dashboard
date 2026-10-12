@@ -42,6 +42,83 @@ def _summaries(frame: pd.DataFrame, columns: list[str]) -> list[dict[str, object
     ]
 
 
+def _share(numerator: float | int, denominator: float | int) -> float | None:
+    if denominator == 0:
+        return None
+    return _number(Decimal(str(numerator)) / Decimal(str(denominator)) * Decimal("100"))
+
+
+def _profitability(frame: pd.DataFrame) -> dict[str, object]:
+    # این نما فقط Furniture را بررسی می‌کند، اما همهٔ فیلترهای سراسری را حفظ می‌کند.
+    furniture = frame.loc[frame["Category"] == "Furniture"]
+    sales = float(furniture["Sales"].sum()) if not furniture.empty else 0.0
+    profit = float(furniture["Profit"].sum()) if not furniture.empty else 0.0
+    high_discount = furniture["Discount"] > 0.20
+    losses = furniture.loc[furniture["Profit"] < 0, "Profit"]
+    gross_loss = float(-losses.sum()) if not losses.empty else 0.0
+    top_loss = float(-losses.nsmallest(10).sum()) if not losses.empty else 0.0
+
+    discount_bands: list[dict[str, object]] = []
+    for key, mask in (("up_to_20", ~high_discount), ("above_20", high_discount)):
+        group = furniture.loc[mask]
+        group_sales = float(group["Sales"].sum()) if not group.empty else 0.0
+        group_profit = float(group["Profit"].sum()) if not group.empty else 0.0
+        loss_count = int((group["Profit"] < 0).sum()) if not group.empty else 0
+        discount_bands.append({
+            "discount_band": key,
+            "sales": _number(group_sales),
+            "profit": _number(group_profit),
+            "profit_margin": _margin(group_sales, group_profit),
+            "line_items": int(len(group)),
+            "loss_line_items": loss_count,
+            "loss_line_share": _share(loss_count, len(group)),
+        })
+
+    subcategories: list[dict[str, object]] = []
+    if not furniture.empty:
+        for subcategory, group in furniture.groupby("Sub-Category", sort=True):
+            group_sales = float(group["Sales"].sum())
+            group_profit = float(group["Profit"].sum())
+            group_high_discount = group["Discount"] > 0.20
+            subcategories.append({
+                "subcategory": str(subcategory),
+                "sales": _number(group_sales),
+                "profit": _number(group_profit),
+                "profit_margin": _margin(group_sales, group_profit),
+                "average_discount": _number(float(group["Discount"].mean()) * 100),
+                "low_discount_profit": _number(float(group.loc[~group_high_discount, "Profit"].sum())),
+                "high_discount_profit": _number(float(group.loc[group_high_discount, "Profit"].sum())),
+            })
+        subcategories.sort(key=lambda item: (float(item["profit"]), str(item["subcategory"])))
+
+    states: list[dict[str, object]] = []
+    if not furniture.empty:
+        for state, group in furniture.groupby("State", sort=True):
+            group_sales = float(group["Sales"].sum())
+            group_profit = float(group["Profit"].sum())
+            states.append({
+                "state": str(state),
+                "sales": _number(group_sales),
+                "profit": _number(group_profit),
+                "profit_margin": _margin(group_sales, group_profit),
+                "average_discount": _number(float(group["Discount"].mean()) * 100),
+            })
+        states.sort(key=lambda item: (float(item["profit"]), str(item["state"])))
+
+    return {
+        "kpis": {
+            "furniture_sales": _number(sales),
+            "furniture_profit": _number(profit),
+            "furniture_margin": _margin(sales, profit),
+            "high_discount_sales_share": _share(float(furniture.loc[high_discount, "Sales"].sum()), sales),
+            "top_10_loss_share": _share(top_loss, gross_loss),
+        },
+        "discount_bands": discount_bands,
+        "subcategories": subcategories,
+        "states": states,
+    }
+
+
 def build_dashboard(store: DatasetStore, filters: DashboardFilters) -> dict[str, object]:
     # همه KPIها و نمودارها از همین DataFrame ساخته می‌شوند تا نتیجه‌ها یکسان باشند.
     frame = apply_filters(store, filters)
@@ -95,5 +172,5 @@ def build_dashboard(store: DatasetStore, filters: DashboardFilters) -> dict[str,
             "line_items": int(len(frame)), "negative_profit_line_items": int((frame["Profit"] < 0).sum()),
         },
         "monthly_trends": monthly_trends, "categories": categories, "subcategories": subcategories,
-        "regions": regions, "states": states,
+        "regions": regions, "states": states, "profitability": _profitability(frame),
     }

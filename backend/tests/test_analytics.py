@@ -100,6 +100,31 @@ def test_chart_aggregates_are_consistent_with_kpis(store):
     assert sum(item["sales"] for item in result["states"]) == pytest.approx(result["kpis"]["total_sales"], abs=0.02)
 
 
+def test_furniture_profitability_reconciles_discount_drivers(store):
+    result = build_dashboard(store, DashboardFilters())
+    profitability = result["profitability"]
+    assert profitability["kpis"] == {
+        "furniture_sales": 94647.92,
+        "furniture_profit": 146.56,
+        "furniture_margin": 0.15,
+        "high_discount_sales_share": 30.42,
+        "top_10_loss_share": 56.38,
+    }
+    bands = {row["discount_band"]: row for row in profitability["discount_bands"]}
+    assert bands["up_to_20"]["profit"] == 9020.86
+    assert bands["above_20"]["profit"] == -8874.30
+    assert bands["above_20"]["loss_line_share"] == 98.18
+    assert sum(row["profit"] for row in bands.values()) == pytest.approx(146.56, abs=0.01)
+
+
+def test_profitability_uses_global_filters_and_handles_no_furniture(store):
+    result = build_dashboard(store, DashboardFilters(categories=["Technology"]))
+    assert result["profitability"]["kpis"]["furniture_sales"] == 0.0
+    assert result["profitability"]["kpis"]["furniture_margin"] is None
+    assert result["profitability"]["subcategories"] == []
+    assert result["profitability"]["states"] == []
+
+
 def test_unknown_filter_value_is_rejected(store):
     with pytest.raises(FilterValidationError):
         apply_filters(store, DashboardFilters(regions=["Unknown Region"]))

@@ -1,8 +1,8 @@
 "use client";
 
 import { useId, type ReactNode } from "react";
-import { Bar, CartesianGrid, Cell, ComposedChart, Line, ReferenceDot, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis, type TooltipContentProps } from "recharts";
-import type { DashboardResponse, State } from "@/lib/api";
+import { Bar, BarChart, CartesianGrid, Cell, ComposedChart, Legend, Line, ReferenceDot, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis, type TooltipContentProps } from "recharts";
+import type { DashboardResponse, Profitability as ProfitabilityData, State } from "@/lib/api";
 import { formatCurrency, formatNumber, formatPercent } from "@/lib/format";
 import { interpolate, type Messages } from "@/lib/i18n";
 import { buildMonthlySeries, monthlyExtremes, type MonthlyObservation, type MonthlyPoint } from "@/lib/monthly";
@@ -146,6 +146,75 @@ export function ProfitComparison({ rows, t, margin = true, products = false, gro
     </div>)}
     <div className="comparison-axis"><span /><div>{ticks.map(tick => <span key={tick} style={{ left: `${x(tick)}%` }}>{compactUSD(tick)}</span>)}</div></div>
   </div></div>;
+}
+
+export function ProfitabilityKpis({ data, t }: { data: ProfitabilityData; t: Messages }) {
+  const values = [
+    { name: t.furnitureSales, value: formatCurrency(data.kpis.furniture_sales), color: "sales" },
+    { name: t.profitMargin, value: formatPercent(data.kpis.furniture_margin), color: (data.kpis.furniture_margin ?? 0) < 0 ? "negative" : "positive" },
+    { name: t.highDiscountShare, value: formatPercent(data.kpis.high_discount_sales_share), color: "" },
+    { name: t.lossConcentration, value: formatPercent(data.kpis.top_10_loss_share), color: "" },
+  ];
+  return <section className="kpis profitability-kpis" aria-label={t.profitabilityTitle}>{values.map(item=><article key={item.name} className="kpi card"><p>{item.name}</p><strong className={item.color}><Numeric>{item.value}</Numeric></strong></article>)}</section>;
+}
+
+export function ProfitBridge({ data, t }: { data: ProfitabilityData; t: Messages }) {
+  const low = data.discount_bands.find(row=>row.discount_band==="up_to_20")?.profit ?? 0;
+  const high = data.discount_bands.find(row=>row.discount_band==="above_20")?.profit ?? 0;
+  const net = data.kpis.furniture_profit;
+  const stages = [
+    { key:"low", label:t.lowDiscountProfit, start:0, end:low, delta:low, fill:COLORS.sales },
+    { key:"high", label:t.highDiscountProfit, start:low, end:low+high, delta:high, fill:high < 0 ? COLORS.loss : COLORS.profit },
+    { key:"net", label:t.netFurnitureProfit, start:0, end:net, delta:net, fill:net < 0 ? COLORS.loss : COLORS.profit },
+  ];
+  const values=stages.flatMap(row=>[row.start,row.end]);
+  const min=Math.min(0,...values), max=Math.max(0,...values);
+  const span=max-min || 1, width=760, height=350, top=38, bottom=92;
+  const y=(value:number)=>top+(max-value)/span*(height-top-bottom);
+  const zero=y(0), xs=[90,325,560], barWidth=112;
+  return <div className="profit-bridge" dir="ltr"><svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={t.discountBridge}>
+    <line x1="36" x2={width-36} y1={zero} y2={zero} stroke={COLORS.ink} strokeWidth="1.5" />
+    <text x="30" y={zero-7} textAnchor="end" fontSize="12" fill={COLORS.ink}>$0</text>
+    {stages.map((row,index)=>{
+      const y1=y(row.start), y2=y(row.end), rectY=Math.min(y1,y2), rectHeight=Math.max(3,Math.abs(y1-y2));
+      return <g key={row.key}>
+        {index<2&&<line x1={xs[index]+barWidth} x2={xs[index+1]} y1={y(row.end)} y2={y(row.end)} stroke={COLORS.muted} strokeDasharray="4 4" />}
+        <rect x={xs[index]} y={rectY} width={barWidth} height={rectHeight} rx="3" fill={row.fill} />
+        <text x={xs[index]+barWidth/2} y={row.delta>=0?rectY-10:rectY+rectHeight+20} textAnchor="middle" fontSize="14" fontWeight="700" fill={row.delta<0?COLORS.loss:COLORS.ink}>{formatCurrency(row.delta)}</text>
+        <foreignObject x={xs[index]-25} y={height-72} width={barWidth+50} height="62"><div className="bridge-label" dir={t.chartDirection}>{row.label}</div></foreignObject>
+      </g>;
+    })}
+  </svg></div>;
+}
+
+export function DiscountBandComparison({ data, t }: { data: ProfitabilityData; t: Messages }) {
+  const label=(key:string)=>key==="up_to_20"?t.upTo20:t.above20;
+  return <>
+    <ProfitComparison rows={data.discount_bands.map(row=>({name:label(row.discount_band),sales:row.sales,profit:row.profit,profit_margin:row.profit_margin}))} t={t}/>
+    <div className="discount-band-stats">{data.discount_bands.map(row=><div key={row.discount_band}><span>{label(row.discount_band)}</span><strong><Numeric negative={(row.loss_line_share??0)>50}>{formatPercent(row.loss_line_share)}</Numeric></strong><small>{t.lossLineShare}</small></div>)}</div>
+  </>;
+}
+
+export function SubcategoryDiscountChart({ data, t }: { data: ProfitabilityData; t: Messages }) {
+  if (!data.subcategories.length) return <Empty t={t}/>;
+  return <div className="subcategory-discount-chart" dir="ltr"><ResponsiveContainer width="100%" height="100%">
+    <BarChart data={data.subcategories} layout="vertical" margin={{top:8,right:30,bottom:12,left:12}} accessibilityLayer>
+      <CartesianGrid stroke={COLORS.grid} horizontal={false}/>
+      <XAxis type="number" tickFormatter={compactUSD} tick={{fontSize:12,fill:COLORS.muted}} tickLine={false}/>
+      <YAxis type="category" dataKey="subcategory" width={105} tick={{fontSize:13,fill:COLORS.ink}} tickLine={false} axisLine={false}/>
+      <Tooltip formatter={(value,name)=>[formatCurrency(Number(value)),String(name)]} contentStyle={{borderColor:COLORS.grid,borderRadius:7}} cursor={{fill:COLORS.ink,fillOpacity:.04}}/>
+      <Legend verticalAlign="top" height={38}/>
+      <ReferenceLine x={0} stroke={COLORS.ink} strokeWidth={1.5}/>
+      <Bar dataKey="low_discount_profit" name={t.upTo20} fill={COLORS.sales} maxBarSize={28} isAnimationActive={false}/>
+      <Bar dataKey="high_discount_profit" name={t.above20} fill="#B45309" maxBarSize={28} isAnimationActive={false}/>
+    </BarChart>
+  </ResponsiveContainer></div>;
+}
+
+export function FurnitureStateLossTable({ data, t }: { data: ProfitabilityData; t: Messages }) {
+  const losses=data.states.filter(row=>row.profit<0).slice(0,5);
+  if (!losses.length) return <p className="empty">{t.noLoss}</p>;
+  return <div className="table-scroll"><table><thead><tr><th>{t.state}</th><th>{t.sales}</th><th>{t.profit}</th><th>{t.margin}</th><th>{t.averageDiscount}</th></tr></thead><tbody>{losses.map(row=><tr key={row.state}><th scope="row"><bdi dir="ltr">{row.state}</bdi></th><td><Numeric>{formatCurrency(row.sales)}</Numeric></td><td><Numeric negative>{formatCurrency(row.profit)}</Numeric></td><td><Numeric negative>{formatPercent(row.profit_margin)}</Numeric></td><td><Numeric>{formatPercent(row.average_discount)}</Numeric></td></tr>)}</tbody></table></div>;
 }
 
 function blend(from: string, to: string, amount: number): string {

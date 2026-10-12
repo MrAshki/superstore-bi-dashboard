@@ -65,7 +65,7 @@ summary::-webkit-details-marker { display:none; }
 .chip button { display:grid; place-items:center; border:0; background:transparent; width:32px; height:32px; }
 .pending { margin:8px 0 0; font-size:13px; color:#92400E; }
 .filter-bar>p.negative { font-size:14px; margin:8px 0 0; }
-.tabs { display:flex; gap:8px; border-bottom:1px solid var(--border); margin-bottom:20px; }
+.tabs { display:flex; gap:8px; border-bottom:1px solid var(--border); margin-bottom:20px; overflow-x:auto; }
 .tabs button { padding:10px 20px; min-height:44px; border:0; border-bottom:3px solid transparent; background:transparent; color:var(--muted); font-weight:650; }
 .tabs button.active { color:var(--sales); border-bottom-color:var(--sales); }
 .view-content { display:grid; gap:18px; }
@@ -99,6 +99,17 @@ summary::-webkit-details-marker { display:none; }
 @media(max-width:1200px) { .monthly-scroll-note { display:block; } .report-canvas .monthly-scroll-note { display:none; } }
 .chart-note { color:var(--muted); font-size:12px; margin:4px 0 0; }
 .comparison-grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+.profitability-grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+.profit-bridge { width:100%; height:350px; }
+.profit-bridge>svg { width:100%; height:100%; display:block; }
+.bridge-label { height:62px; display:flex; align-items:flex-start; justify-content:center; text-align:center; color:var(--muted); font-size:13px; line-height:1.45; padding:5px; }
+.discount-band-stats { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px; }
+.discount-band-stats>div { background:var(--page); border-radius:6px; padding:10px 12px; display:grid; grid-template-columns:1fr auto; align-items:center; gap:2px 10px; }
+.discount-band-stats span { color:var(--muted); font-size:13px; }
+.discount-band-stats strong { font-size:18px; }
+.discount-band-stats small { grid-column:1 / -1; color:var(--muted); }
+.subcategory-discount-chart { width:100%; height:340px; min-width:0; }
+.profitability-note { text-align:center; margin:0; }
 .comparison { --columns: 135px minmax(130px,1fr) 115px 115px 75px; font-size:13px; min-width:595px; }
 .comparison.no-margin { --columns:100px minmax(130px,1fr) 115px 115px; min-width:500px; }
 .comparison.product-comparison { --columns:180px minmax(300px,1fr) 165px 165px 110px; font-size:15px; min-width:970px; }
@@ -187,12 +198,17 @@ tbody tr:last-child th,tbody tr:last-child td { border-bottom:0; }
 .report-geography .chart-note { font-size:13px; }
 .report-geography .state-map { height:420px; }
 .report-geography .scatter-content>svg { height:420px; }
+.report-profitability { min-height:1400px; }
+.report-profitability .profit-bridge { height:300px; }
+.report-profitability .subcategory-discount-chart { height:330px; }
+.report-profitability .profitability-note { font-size:13px; }
 
 @media(max-width:1100px) {
   .header { align-items:flex-start; }.header-actions { flex-wrap:wrap; justify-content:end; }
-  .kpi strong { font-size:29px; }.comparison-grid { grid-template-columns:1fr; }.geography-grid { grid-template-columns:1fr; }
+  .kpi strong { font-size:29px; }.comparison-grid,.profitability-grid { grid-template-columns:1fr; }.geography-grid { grid-template-columns:1fr; }
   .more-panel { inset-inline-start:auto; inset-inline-end:0; }
   .report-canvas .comparison-grid { grid-template-columns:1fr 1fr; }
+  .report-canvas .profitability-grid { grid-template-columns:1fr 1fr; }
   .report-canvas .geography-grid { grid-template-columns:1.15fr 1fr; }
 }
 @media(min-width:701px) and (max-width:960px) {
@@ -205,12 +221,14 @@ tbody tr:last-child th,tbody tr:last-child td { border-bottom:0; }
   .more-panel { position:fixed; left:16px; right:16px; top:180px; width:auto; max-height:65vh; overflow-y:auto; grid-template-columns:1fr; }
   .more-panel .selector-panel { position:relative; top:4px; width:100%; box-shadow:none; }
   .selector-panel { width:240px; }.filter-main>.selector:nth-child(2)>.selector-panel { inset-inline-start:auto; inset-inline-end:0; }
-  .tabs { gap:0; }.tabs button { padding:10px 15px; }.card { padding:16px; }.card-heading { align-items:flex-start; flex-wrap:wrap; }
+  .tabs { gap:0; }.tabs button { padding:10px 15px; white-space:nowrap; }.card { padding:16px; }.card-heading { align-items:flex-start; flex-wrap:wrap; }
   .findings { grid-template-columns:1fr; }.geography-grid { grid-template-columns:1fr; }
   .monthly-scroll-note { display:block; }
   .report-canvas .monthly-scroll-note { display:none; }
   .map-legend { justify-content:center; }.metric-switch button { min-height:44px; }
+  .profitability-grid { grid-template-columns:1fr; }.profit-bridge { height:320px; }.discount-band-stats { grid-template-columns:1fr; }
   .scatter-content>svg { min-width:390px; }.scatter-content { overflow:auto; }.state-map { min-width:390px; }.map-content { overflow:auto; }
   .report-canvas .kpis { grid-template-columns:repeat(4,1fr); gap:18px; }.report-canvas .findings { grid-template-columns:1fr 1fr; }
+  .report-canvas .profitability-grid { grid-template-columns:1fr 1fr; }.report-canvas .discount-band-stats { grid-template-columns:1fr 1fr; }
   .report-canvas .card-heading { flex-wrap:nowrap; }.report-canvas .state-map,.report-canvas .scatter-content>svg { min-width:0; }
 }

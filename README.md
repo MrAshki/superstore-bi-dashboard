@@ -42,7 +42,7 @@ npm run start -- --port 3000
 
 Open `http://127.0.0.1:3000`. Set `BACKEND_API_URL` in `frontend/.env.local` only when the backend does not use its default address. See `frontend/README.md` for details.
 
-The dashboard has Overview, Products, and Geography views. Export report creates three PNG images from the applied filter state. Verified baseline images are in `reports/`; English copies are in `reports/en/`.
+The dashboard has Overview, Products, Profitability, and Geography views. Export report creates four PNG images from the applied filter state. Verified baseline images are in `reports/`; English copies are in `reports/en/`.
 
 ## Configuration
 

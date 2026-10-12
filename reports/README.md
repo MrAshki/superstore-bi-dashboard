@@ -6,7 +6,8 @@ The files in this folder use Persian. English copies are in `en/`.
 
 - `01-overview.png`: totals, two baseline findings, monthly Sales columns with a three-month average, diverging Profit columns, and Category and Region comparisons.
 - `02-products.png`: all 17 Sub-Categories, ordered by Profit from lowest to highest.
-- `03-geography.png`: state Profit map, Sales versus Profit, and the five largest State losses.
+- `03-profitability.png`: Furniture discount bridge, discount-band comparison, Sub-Category drivers, and the largest State losses.
+- `04-geography.png`: state Profit map, Sales versus Profit, and the five largest State losses.
 
 The reporting period is 2014-01-04 to 2017-12-30. The source is `superstore-sales.csv`. There are 1,163 line items, 553 distinct orders, and 41 observed States / DC.
 

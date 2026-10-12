@@ -47,6 +47,41 @@ export type State = {
   unique_orders: number;
 };
 
+export type Profitability = {
+  kpis: {
+    furniture_sales: number;
+    furniture_profit: number;
+    furniture_margin: number | null;
+    high_discount_sales_share: number | null;
+    top_10_loss_share: number | null;
+  };
+  discount_bands: Array<{
+    discount_band: "up_to_20" | "above_20";
+    sales: number;
+    profit: number;
+    profit_margin: number | null;
+    line_items: number;
+    loss_line_items: number;
+    loss_line_share: number | null;
+  }>;
+  subcategories: Array<{
+    subcategory: string;
+    sales: number;
+    profit: number;
+    profit_margin: number | null;
+    average_discount: number | null;
+    low_discount_profit: number;
+    high_discount_profit: number;
+  }>;
+  states: Array<{
+    state: string;
+    sales: number;
+    profit: number;
+    profit_margin: number | null;
+    average_discount: number | null;
+  }>;
+};
+
 export type DashboardResponse = {
   applied_filters: DashboardFilters;
   filtered_rows: number;
@@ -56,6 +91,7 @@ export type DashboardResponse = {
   subcategories: Array<Category & { subcategory: string }>;
   regions: Region[];
   states: State[];
+  profitability: Profitability;
 };
 
 export const emptyFilters: DashboardFilters = {
