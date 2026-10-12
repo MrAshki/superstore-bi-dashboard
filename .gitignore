@@ -1,0 +1,29 @@
+# Python virtual environments and generated Python files
+.venv/
+.venv-backup-*/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Jupyter generated files
+.ipynb_checkpoints/
+
+# Environment settings
+.env
+.env.*
+
+# Frontend build output for a later phase
+node_modules/
+.next/
+dist/
+frontend/output/
+frontend/.playwright-cli/
+*.tsbuildinfo
+
+# The published portfolio is a separate project and repository
+sites/
+
+# Local backup of the original standalone frontend Git metadata
+frontend/.git.frontend-backup/

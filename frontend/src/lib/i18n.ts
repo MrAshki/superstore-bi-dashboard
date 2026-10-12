@@ -1,0 +1,85 @@
+import type { Language } from "./api";
+
+const en = {
+  title: "Superstore Executive Dashboard", overview: "Overview", products: "Products", geography: "Geography",
+  export: "Export report", exporting: "Preparing images…", exportDone: "Three report images are ready to save.",
+  exportFailed: "The report could not be exported. Try again.", language: "Language",
+  year: "Year", region: "Region", more: "More filters", apply: "Apply", reset: "Reset", all: "All",
+  startDate: "Start Date", endDate: "End Date", segment: "Segment", category: "Category",
+  subcategory: "Sub-Category", state: "State", search: "Search", close: "Close", remove: "Remove",
+  pending: "Pending changes — select Apply to update all views.", dateError: "Start Date must be on or before End Date.",
+  allData: "All data", period: "Reporting period", sales: "Sales", profit: "Profit", margin: "Margin",
+  totalSales: "Total Sales", totalProfit: "Total Profit", profitMargin: "Profit Margin", orders: "Unique Orders",
+  monthly: "Monthly performance", salesTrend: "Monthly Sales · USD", profitTrend: "Monthly Profit · USD",
+  categoryProfit: "Profit by Category", regionProfit: "Profit by Region", subcategoryProfit: "Profit by Sub-Category",
+  lowestFirst: "Lowest Profit first", noData: "No observations match these filters.",
+  noLoss: "No loss-making States in this selection.", loading: "Loading report…", error: "Data could not be loaded.",
+  retry: "Retry", connectionError: "Data connection is unavailable.", source: "Source",
+  about: "About the data", aboutText: "Each row is an order line item. Unique Orders counts distinct Order IDs. Profit Margin is Total Profit ÷ Total Sales × 100. Values use USD and Gregorian dates. Group totals are rounded after aggregation.",
+  monthlyNote: "Blank months have no observations. A short mark at zero is a measured zero. The average needs three consecutive observed months.",
+  movingAverage: "3-month moving average", peakSales: "Highest monthly Sales", biggestLoss: "Largest monthly loss",
+  january: "Jan", april: "Apr", july: "Jul", october: "Oct", december: "Dec", monthlyScroll: "Scroll horizontally to see every month.",
+  chartDirection: "ltr", chartLocale: "en-US",
+  association: "These observations do not establish cause.",
+  furnitureTitle: "Furniture: substantial Sales, thin Profit", annualTitle: "Profit decreased in 2017",
+  furnitureText: "Furniture Sales {sales}, Profit {profit}, Margin {margin}. Tables and Bookcases together: {loss}.",
+  annualText: "2016 Profit {previous}; 2017 Profit {current}. Decrease: {decline}.",
+  findingError: "The annual comparison is unavailable.", baseline: "Full-dataset findings",
+  mapTitle: "US States", mapProfit: "Profit by State", mapSales: "Sales by State",
+  scatter: "Sales versus Profit by State", salesAxis: "Sales (USD)", profitAxis: "Profit (USD)",
+  loss: "Loss", positiveProfit: "Positive Profit", noObservations: "No data", measuredZero: "Measured zero",
+  coverage: "{count} observed States / DC. Missing States are not zero.",
+  losses: "Largest State losses", details: "View details", stateDetails: "All State details",
+  previous: "Previous", next: "Next", page: "Page", sort: "Sort by", ascending: "Ascending", descending: "Descending",
+  observations: "line items", mapSource: "Boundaries: US Census 2017 · us-atlas (ISC)",
+  download: "Save image", reportReady: "Report images", financialNote: "All financial values are USD.",
+  subcategoryNote: "{count} Sub-Categories · exact values from the selected population",
+  detailSearch: "Search States", connection: "Connection", profitLegend: "Positive / negative Profit",
+} as const;
+
+type Dictionary = { [K in keyof typeof en]: string };
+const fa: Dictionary = {
+  title: "داشبورد مدیریتی سوپر استور", overview: "نمای کلی", products: "محصولات", geography: "جغرافیا",
+  export: "خروجی گزارش", exporting: "آماده‌سازی تصاویر…", exportDone: "سه تصویر گزارش آمادهٔ ذخیره هستند.",
+  exportFailed: "خروجی گزارش ساخته نشد. دوباره تلاش کنید.", language: "زبان",
+  year: "سال", region: "ناحیه", more: "فیلترهای بیشتر", apply: "اعمال", reset: "بازنشانی", all: "همه",
+  startDate: "تاریخ شروع", endDate: "تاریخ پایان", segment: "بخش مشتری", category: "دسته‌بندی",
+  subcategory: "زیردسته", state: "ایالت", search: "جست‌وجو", close: "بستن", remove: "حذف",
+  pending: "تغییرهای اعمال‌نشده — برای به‌روزرسانی همهٔ نماها، «اعمال» را بزنید.", dateError: "تاریخ شروع باید پیش از تاریخ پایان یا برابر آن باشد.",
+  allData: "کل داده‌ها", period: "بازهٔ گزارش", sales: "فروش", profit: "سود", margin: "حاشیه سود",
+  totalSales: "فروش کل", totalProfit: "سود کل", profitMargin: "حاشیه سود", orders: "سفارش‌های یکتا",
+  monthly: "عملکرد ماهانه", salesTrend: "فروش ماهانه · USD", profitTrend: "سود ماهانه · USD",
+  categoryProfit: "سود بر اساس دسته‌بندی", regionProfit: "سود بر اساس ناحیه", subcategoryProfit: "سود بر اساس زیردسته",
+  lowestFirst: "کمترین سود در ابتدا", noData: "برای این فیلترها مشاهده‌ای وجود ندارد.",
+  noLoss: "در این انتخاب، ایالت زیان‌ده وجود ندارد.", loading: "در حال بارگذاری گزارش…", error: "داده‌ها بارگذاری نشدند.",
+  retry: "تلاش دوباره", connectionError: "اتصال به داده‌ها در دسترس نیست.", source: "منبع",
+  about: "دربارهٔ داده‌ها", aboutText: "هر ردیف یک قلم سفارش است. سفارش‌های یکتا با شمارش Order IDهای متمایز محاسبه می‌شوند. حاشیه سود برابر سود کل تقسیم بر فروش کل، ضرب در 100 است. واحد پول USD و تاریخ‌ها میلادی هستند. مجموع گروه‌ها پس از محاسبه گرد می‌شوند.",
+  monthlyNote: "ماه خالی مشاهده ندارد. نشانهٔ کوتاه روی صفر، صفر واقعی است. میانگین به سه ماه متوالیِ دارای مشاهده نیاز دارد.",
+  movingAverage: "میانگین متحرک سه‌ماهه", peakSales: "بیشترین فروش ماهانه", biggestLoss: "بیشترین زیان ماهانه",
+  january: "ژانویه", april: "آوریل", july: "ژوئیه", october: "اکتبر", december: "دسامبر", monthlyScroll: "برای دیدن همهٔ ماه‌ها، نمودار را افقی حرکت دهید.",
+  chartDirection: "rtl", chartLocale: "fa-IR-u-ca-gregory-nu-latn",
+  association: "این مشاهده‌ها علت را ثابت نمی‌کنند.",
+  furnitureTitle: "Furniture: فروش قابل توجه، سود اندک", annualTitle: "کاهش سود در سال 2017",
+  furnitureText: "فروش Furniture برابر {sales}، سود {profit} و حاشیه سود {margin} است. مجموع Tables و Bookcases: {loss}.",
+  annualText: "سود 2016 برابر {previous} و سود 2017 برابر {current} بود. کاهش: {decline}.",
+  findingError: "مقایسهٔ سالانه در دسترس نیست.", baseline: "یافته‌های کل داده‌ها",
+  mapTitle: "ایالت‌های آمریکا", mapProfit: "سود بر اساس ایالت", mapSales: "فروش بر اساس ایالت",
+  scatter: "فروش در برابر سود ایالت‌ها", salesAxis: "فروش (USD)", profitAxis: "سود (USD)",
+  loss: "زیان", positiveProfit: "سود مثبت", noObservations: "بدون داده", measuredZero: "صفر ثبت‌شده",
+  coverage: "{count} ایالت / DC دارای داده. ایالت غایب، صفر نیست.",
+  losses: "بیشترین زیان ایالت‌ها", details: "نمایش جزئیات", stateDetails: "جزئیات همهٔ ایالت‌ها",
+  previous: "قبلی", next: "بعدی", page: "صفحه", sort: "مرتب‌سازی", ascending: "صعودی", descending: "نزولی",
+  observations: "ردیف سفارش", mapSource: "مرزها: US Census 2017 · us-atlas (ISC)",
+  download: "ذخیرهٔ تصویر", reportReady: "تصاویر گزارش", financialNote: "تمام مقدارهای مالی با USD نمایش داده شده‌اند.",
+  subcategoryNote: "{count} زیردسته · مقدارهای دقیق برای جمعیت انتخاب‌شده",
+  detailSearch: "جست‌وجوی ایالت", connection: "اتصال", profitLegend: "سود مثبت / منفی",
+};
+
+export const messages = { en, fa };
+export type Messages = Dictionary;
+export function getMessages(language: Language): Dictionary { return messages[language]; }
+
+// مقدارهای یافته‌ها از پاسخ API جای‌گذاری می‌شوند و به عدد ثابت وابسته نیستند.
+export function interpolate(template: string, values: Record<string, string>): string {
+  return template.replace(/\{(\w+)\}/g, (match, key: string) => values[key] ?? match);
+}
