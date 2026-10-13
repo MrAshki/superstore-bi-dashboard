@@ -83,10 +83,6 @@ export function MonthlyCharts({ rows, t }: { rows: MonthlyObservation[]; t: Mess
   const xDomain: [number, number] = [first - .5, last + .5];
 
   return <div className="monthly-stack">
-    <div className="monthly-extremes">
-      <span>{t.peakSales}: <Numeric>{peak.year_month} · {formatCurrency(peak.sales!)}</Numeric></span>
-      {loss && <span>{t.biggestLoss}: <Numeric negative>{loss.year_month} · {formatCurrency(loss.profit!)}</Numeric></span>}
-    </div>
     <div className="monthly-scroll" dir="ltr"><div className="monthly-plots" style={{ minWidth: Math.max(640, values.length * 22) }}>
       {(["sales", "profit"] as const).map(metric => {
         const highlight = metric === "sales" ? peak : loss;

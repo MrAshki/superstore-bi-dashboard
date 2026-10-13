@@ -87,7 +87,6 @@ summary::-webkit-details-marker { display:none; }
 .trend h3 { text-align:start; }
 .monthly-scroll { overflow-x:auto; }
 .monthly-plots { display:grid; gap:16px; width:100%; }
-.monthly-extremes { display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px 20px; font-size:14px; color:var(--muted); }
 .monthly-series-legend { display:flex; gap:18px; align-items:center; font-size:13px; margin-bottom:2px; color:var(--muted); }
 .monthly-series-legend span { display:flex; align-items:center; gap:6px; }
 .monthly-series-legend i { display:inline-block; width:14px; height:10px; border-radius:2px; }
