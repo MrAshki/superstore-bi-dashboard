@@ -136,7 +136,20 @@ summary::-webkit-details-marker { display:none; }
 .legend-scale>div { display:flex; justify-content:space-between; font-size:11px; margin-top:3px; }
 .map-content>.chart-note { margin-top:8px; }
 .asset-credit { color:var(--muted); font-size:11px; margin:8px 0 0; }
-.scatter-content>svg { width:100%; display:block; }
+.scatter-plot { position:relative; }
+.scatter-plot>svg { width:100%; display:block; }
+.scatter-point { cursor:pointer; outline:none; }
+.scatter-point:focus-visible { outline:none; }
+.scatter-tooltip { position:absolute; z-index:3; width:215px; pointer-events:none; background:#FFFFFF; border:1px solid var(--border); border-radius:7px; padding:10px 12px; box-shadow:0 8px 24px rgb(15 23 42 / .15); font-size:13px; }
+.scatter-tooltip strong { display:block; margin-bottom:6px; }
+.scatter-tooltip dl { display:grid; grid-template-columns:1fr auto; gap:4px 14px; margin:0; }
+.scatter-tooltip dt { color:var(--muted); }
+.scatter-tooltip dd { margin:0; text-align:end; }
+.scatter-legend { display:flex; justify-content:center; align-items:center; gap:22px; color:var(--muted); font-size:13px; margin-top:2px; }
+.scatter-legend span { display:flex; align-items:center; gap:8px; }
+.scatter-legend i { display:inline-block; width:11px; height:11px; }
+.scatter-positive { border-radius:50%; background:var(--profit); }
+.scatter-negative { background:var(--loss); transform:rotate(45deg); border-radius:1px; }
 .table-scroll { overflow-x:auto; }
 table { width:100%; border-collapse:collapse; text-align:start; font-size:14px; }
 th,td { border-bottom:1px solid var(--border); padding:9px 12px; white-space:nowrap; }
@@ -199,7 +212,7 @@ tbody tr:last-child th,tbody tr:last-child td { border-bottom:0; }
 .report-geography .map-legend { gap:14px; font-size:13px; }
 .report-geography .chart-note { font-size:13px; }
 .report-geography .state-map { height:420px; }
-.report-geography .scatter-content>svg { height:420px; }
+.report-geography .scatter-plot>svg { height:420px; }
 .report-profitability { min-height:1400px; }
 .report-profitability .profit-bridge { height:300px; }
 .report-profitability .subcategory-discount-chart { height:330px; }
@@ -229,8 +242,8 @@ tbody tr:last-child th,tbody tr:last-child td { border-bottom:0; }
   .report-canvas .monthly-scroll-note { display:none; }
   .map-legend { justify-content:center; }.metric-switch button { min-height:44px; }
   .profitability-grid { grid-template-columns:1fr; }.profit-bridge { height:320px; }.discount-band-stats { grid-template-columns:1fr; }
-  .scatter-content>svg { min-width:390px; }.scatter-content { overflow:auto; }.state-map { min-width:390px; }.map-content { overflow:auto; }
+  .scatter-plot { min-width:390px; }.scatter-content { overflow:auto; }.state-map { min-width:390px; }.map-content { overflow:auto; }
   .report-canvas .kpis { grid-template-columns:repeat(4,1fr); gap:18px; }.report-canvas .findings { grid-template-columns:1fr 1fr; }
   .report-canvas .profitability-grid { grid-template-columns:1fr 1fr; }.report-canvas .discount-band-stats { grid-template-columns:1fr 1fr; }
-  .report-canvas .card-heading { flex-wrap:nowrap; }.report-canvas .state-map,.report-canvas .scatter-content>svg { min-width:0; }
+  .report-canvas .card-heading { flex-wrap:nowrap; }.report-canvas .state-map,.report-canvas .scatter-plot { min-width:0; }
 }

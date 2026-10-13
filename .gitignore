@@ -22,6 +22,10 @@ frontend/output/
 frontend/.playwright-cli/
 *.tsbuildinfo
 
+# Local report exports and visual references
+reports/
+refrence/
+
 # The published portfolio is a separate project and repository
 sites/
 

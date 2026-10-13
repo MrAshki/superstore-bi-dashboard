@@ -82,14 +82,14 @@ function StateDetails({rows,t}:{rows:State[];t:Messages}) {
   </Card></details>;
 }
 
-export function Geography({data,baseline,t,report=false}:{data:DashboardResponse;baseline:boolean;t:Messages;report?:boolean}) {
+export function Geography({data,t,report=false}:{data:DashboardResponse;t:Messages;report?:boolean}) {
   const [metric,setMetric]=useState<"sales"|"profit">("profit");
   return <div className="view-content geography-view">
     <div className="geography-grid">
       <Card title={metric==="profit"?t.mapProfit:t.mapSales} action={!report&&<div className="metric-switch"><button className={metric==="profit"?"active":""} onClick={()=>setMetric("profit")} aria-pressed={metric==="profit"}>{t.profit}</button><button className={metric==="sales"?"active":""} onClick={()=>setMetric("sales")} aria-pressed={metric==="sales"}>{t.sales}</button></div>}>
         <StateMap rows={data.states} metric={metric} t={t}/><p className="asset-credit">{t.mapSource}</p>
       </Card>
-      <Card title={t.scatter}><StateScatter rows={data.states} baseline={baseline} t={t}/></Card>
+      <Card title={t.scatter}><StateScatter rows={data.states} t={t}/></Card>
     </div>
     <Card title={t.losses}><LossTable rows={data.states} t={t}/></Card>
     {!report&&<StateDetails rows={data.states} t={t}/>}

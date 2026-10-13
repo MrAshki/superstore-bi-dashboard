@@ -98,7 +98,7 @@ export function Dashboard() {
     {exportError&&<p className="error-banner" role="alert">{t.exportFailed}</p>}
     {images.length>0&&<section className="download-panel" aria-label={t.reportReady}><p>{t.exportDone}</p>{images.map(image=><a className="button" key={image.filename} href={image.url} download={image.filename}>{t.download} <bdi dir="ltr">{image.filename}</bdi></a>)}</section>}
     {loading?<div className="loading" role="status"><p>{t.loading}</p><div className="skeleton-kpis">{Array.from({length:4},(_,i)=><div key={i}/>)}</div></div>:error?<div className="error-banner" role="alert"><p>{t.error}</p><button className="button" onClick={()=>void load(draft,true)}><RefreshCw size={16} aria-hidden/>{t.retry}</button></div>:data&&<>
-      {view==="overview"?<Overview data={data} monthly={monthly} baseline={isBaseline(applied)} t={t}/>:view==="products"?<Products data={data} t={t}/>:view==="profitability"?<Profitability data={data} t={t}/>:<Geography key={filterKey(applied)} data={data} baseline={isBaseline(applied)} t={t}/>}
+      {view==="overview"?<Overview data={data} monthly={monthly} baseline={isBaseline(applied)} t={t}/>:view==="products"?<Products data={data} t={t}/>:view==="profitability"?<Profitability data={data} t={t}/>:<Geography key={filterKey(applied)} data={data} t={t}/>}
       <footer className="page-footer">{t.source}: <bdi dir="ltr">superstore-sales.csv</bdi> · <Numeric>{data.filtered_rows.toLocaleString("en-US")}</Numeric> {t.observations}</footer>
       {metadata&&<Reports data={data} monthly={monthly} filters={applied} metadata={metadata} language={language}/>}
     </>}

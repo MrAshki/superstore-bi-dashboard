@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, type ReactNode } from "react";
+import { useId, useState, type ReactNode } from "react";
 import { Bar, BarChart, CartesianGrid, Cell, ComposedChart, Legend, Line, ReferenceDot, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis, type TooltipContentProps } from "recharts";
 import type { DashboardResponse, Profitability as ProfitabilityData, State } from "@/lib/api";
 import { formatCurrency, formatNumber, formatPercent } from "@/lib/format";
@@ -28,6 +28,17 @@ export function Kpis({ data, t }: { data: DashboardResponse; t: Messages }) {
 
 function compactUSD(value: number): string {
   return `${value < 0 ? "-$" : "$"}${new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 }).format(Math.abs(value))}`;
+}
+
+function niceTicks(minimum: number, maximum: number, target = 5): number[] {
+  const span=Math.max(1,maximum-minimum);
+  const raw=span/target;
+  const power=10**Math.floor(Math.log10(raw));
+  const fraction=raw/power;
+  const step=(fraction<1.5?1:fraction<3?2:fraction<7?5:10)*power;
+  const start=Math.floor(minimum/step)*step;
+  const end=Math.ceil(maximum/step)*step;
+  return Array.from({length:Math.round((end-start)/step)+1},(_,index)=>start+index*step);
 }
 
 function MonthlyTooltip({ active, payload, t }: Pick<TooltipContentProps, "active" | "payload"> & { t: Messages }) {
@@ -269,33 +280,61 @@ export function StateMap({ rows, metric, t }: { rows: State[]; metric: "sales" |
   </div>;
 }
 
-// برابر بودن اندازهٔ نقطه‌ها اجازه می‌دهد فقط موقعیت Sales و Profit با هم مقایسه شوند.
-export function StateScatter({ rows, t, baseline }: { rows: State[]; t: Messages; baseline: boolean }) {
+// شکل نقطه‌ها علامت سود یا زیان است؛ اندازهٔ ثابت، مقایسهٔ موقعیت را ساده نگه می‌دارد.
+export function StateScatter({ rows, t }: { rows: State[]; t: Messages }) {
+  const [activeState,setActiveState]=useState<string|null>(null);
   if (!rows.length) return <Empty t={t} />;
-  const width = 760, height = 510, left = 95, right = 25, top = 26, bottom = 74;
-  const xMax = Math.max(1, ...rows.map(row => row.sales)) * 1.12;
-  const min = Math.min(0, ...rows.map(row => row.profit));
-  const max = Math.max(0, ...rows.map(row => row.profit));
-  const range = max-min || 1;
-  const yMin = min-range*.2, yMax = max+range*.1;
+  const width=800,height=520,left=94,right=24,top=24,bottom=76;
+  const xTicks=niceTicks(0,Math.max(1,...rows.map(row=>row.sales))*1.06,5);
+  const rawMin=Math.min(0,...rows.map(row=>row.profit));
+  const rawMax=Math.max(0,...rows.map(row=>row.profit));
+  const yTicks=niceTicks(rawMin-(rawMax-rawMin)*.06,rawMax+(rawMax-rawMin)*.06,5);
+  const xMax=xTicks.at(-1) ?? 1;
+  const yMin=yTicks[0],yMax=yTicks.at(-1) ?? 1;
   const x = (value: number) => left + value / xMax * (width-left-right);
   const y = (value: number) => top + (yMax-value) / (yMax-yMin) * (height-top-bottom);
-  const zero = y(0);
-  const names = baseline ? ["Texas","Pennsylvania","North Carolina"] : [];
-  const offsets: Record<string,[number,number]> = {Texas:[36,10],Pennsylvania:[-12,60],"North Carolina":[-25,14]};
-  return <div className="scatter-content" dir="ltr"><svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={t.scatter}>
-    {Array.from({length:5},(_,i) => xMax*i/4).map(tick => <g key={tick}><line x1={x(tick)} x2={x(tick)} y1={top} y2={height-bottom} stroke={COLORS.grid}/><text x={x(tick)} y={height-bottom+25} textAnchor="middle" fill={COLORS.muted} fontSize="15">{compactUSD(tick)}</text></g>)}
-    {Array.from({length:5},(_,i) => yMin+(yMax-yMin)*i/4).map(tick => <g key={tick}><line x1={left} x2={width-right} y1={y(tick)} y2={y(tick)} stroke={COLORS.grid}/><text x={left-12} y={y(tick)+5} textAnchor="end" fill={COLORS.muted} fontSize="15">{compactUSD(tick)}</text></g>)}
-    <line x1={left} x2={width-right} y1={zero} y2={zero} stroke={COLORS.ink} strokeWidth="1.5" strokeDasharray="5 4"/>
-    <text x={left-12} y={zero-8} textAnchor="end" fontSize="15" fill={COLORS.ink}>$0</text>
-    {rows.map(row => <circle key={row.state} cx={x(row.sales)} cy={y(row.profit)} r="5" fill={row.profit < 0 ? COLORS.loss : COLORS.profit} stroke="#FFFFFF" strokeWidth="1.3"><title>{row.state}: {t.sales} {formatCurrency(row.sales)}, {t.profit} {formatCurrency(row.profit)}</title></circle>)}
-    {rows.filter(row => names.includes(row.state)).map(row => {
-      const [dx,dy] = offsets[row.state]; const tx=x(row.sales)+dx, ty=y(row.profit)+dy;
-      return <g key={row.state}><line x1={x(row.sales)} y1={y(row.profit)} x2={tx} y2={ty-5} stroke={COLORS.loss} /><text x={tx} y={ty} textAnchor={dx<0?"end":"start"} fontSize="15" fontWeight="600" fill={COLORS.ink}>{row.state}</text></g>;
-    })}
-    <text x={(width+left-right)/2} y={height-12} textAnchor="middle" fontSize="16" fill={COLORS.ink}>{t.salesAxis}</text>
-    <text transform={`translate(22,${height/2}) rotate(-90)`} textAnchor="middle" fontSize="16" fill={COLORS.ink}>{t.profitAxis}</text>
-  </svg><div className="series-legend"><span><i style={{background:COLORS.profit}} />{t.positiveProfit}</span><span><i style={{background:COLORS.loss}} />{t.loss}</span></div></div>;
+  const zero=y(0);
+  const callouts=[...rows].filter(row=>row.profit<0).sort((a,b)=>a.profit-b.profit).slice(0,3);
+  const active=rows.find(row=>row.state===activeState) ?? null;
+  return <div className="scatter-content" dir="ltr">
+    <div className="scatter-plot">
+      <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={t.scatter} onMouseLeave={()=>setActiveState(null)}>
+        <rect x={left} y={zero} width={width-left-right} height={Math.max(0,height-bottom-zero)} fill="#FFF7F7"/>
+        {xTicks.map(tick=><g key={tick}><line x1={x(tick)} x2={x(tick)} y1={top} y2={height-bottom} stroke={COLORS.grid}/><text x={x(tick)} y={height-bottom+27} textAnchor="middle" fill={COLORS.muted} fontSize="14">{compactUSD(tick)}</text></g>)}
+        {yTicks.map(tick=><g key={tick}><line x1={left} x2={width-right} y1={y(tick)} y2={y(tick)} stroke={tick===0?COLORS.ink:COLORS.grid} strokeWidth={tick===0?1.7:1} strokeDasharray={tick===0?"6 5":undefined}/><text x={left-12} y={y(tick)+5} textAnchor="end" fill={tick===0?COLORS.ink:COLORS.muted} fontSize="14">{compactUSD(tick)}</text></g>)}
+        {rows.map(row=>{
+          const cx=x(row.sales),cy=y(row.profit),negative=row.profit<0,selected=activeState===row.state;
+          const label=`${row.state}: ${t.sales} ${formatCurrency(row.sales)}, ${t.profit} ${formatCurrency(row.profit)}, ${t.margin} ${formatPercent(row.profit_margin)}, ${t.orders} ${formatNumber(row.unique_orders)}`;
+          return <g key={row.state} tabIndex={0} role="graphics-symbol" aria-label={label} onMouseEnter={()=>setActiveState(row.state)} onFocus={()=>setActiveState(row.state)} onBlur={()=>setActiveState(null)} className="scatter-point">
+            <title>{label}</title>
+            {selected&&<circle cx={cx} cy={cy} r="10" fill="none" stroke={negative?COLORS.loss:COLORS.profit} strokeWidth="2" opacity=".28"/>}
+            {negative?<rect x={cx-5} y={cy-5} width="10" height="10" rx="1" transform={`rotate(45 ${cx} ${cy})`} fill={COLORS.loss} stroke="#FFFFFF" strokeWidth="1.4"/>:<circle cx={cx} cy={cy} r="5.5" fill={COLORS.profit} stroke="#FFFFFF" strokeWidth="1.4"/>}
+          </g>;
+        })}
+        {callouts.map((row,index)=>{
+          const px=x(row.sales),py=y(row.profit);
+          const boxWidth=Math.max(112,row.state.length*7.2+26),boxHeight=43;
+          const placeLeft=index===2;
+          const rawX=placeLeft?px-boxWidth-16:px+16;
+          const boxX=Math.max(left+4,Math.min(width-right-boxWidth-4,rawX));
+          const boxY=Math.max(top+4,Math.min(height-bottom-boxHeight-4,py+18));
+          const lineX=placeLeft?boxX+boxWidth:boxX;
+          return <g key={`label-${row.state}`} className="scatter-callout" pointerEvents="none">
+            <line x1={px} y1={py} x2={lineX} y2={boxY+boxHeight/2} stroke={COLORS.loss} strokeWidth="1.2"/>
+            <rect x={boxX} y={boxY} width={boxWidth} height={boxHeight} rx="6" fill="#FFFFFF" stroke="#F4B4B4"/>
+            <text x={boxX+10} y={boxY+17} fontSize="12.5" fontWeight="650" fill={COLORS.ink}>{row.state}<tspan x={boxX+10} dy="16" fill={COLORS.loss} fontWeight="600">{formatCurrency(row.profit)}</tspan></text>
+          </g>;
+        })}
+        <text x={(width+left-right)/2} y={height-12} textAnchor="middle" fontSize="15" fontWeight="600" fill={COLORS.ink}>{t.salesAxis}</text>
+        <text transform={`translate(22,${height/2}) rotate(-90)`} textAnchor="middle" fontSize="15" fontWeight="600" fill={COLORS.ink}>{t.profitAxis}</text>
+      </svg>
+      {active&&<div className="scatter-tooltip" dir={t.chartDirection} role="status" style={{left:`${x(active.sales)/width*100}%`,top:`${y(active.profit)/height*100}%`,transform:y(active.profit)<135?"translate(-50%, 18px)":"translate(-50%, calc(-100% - 14px))"}}>
+        <strong dir="ltr">{active.state}</strong><dl><dt>{t.sales}</dt><dd><Numeric>{formatCurrency(active.sales)}</Numeric></dd><dt>{t.profit}</dt><dd><Numeric negative={active.profit<0}>{formatCurrency(active.profit)}</Numeric></dd><dt>{t.margin}</dt><dd><Numeric negative={(active.profit_margin??0)<0}>{formatPercent(active.profit_margin)}</Numeric></dd><dt>{t.orders}</dt><dd><Numeric>{formatNumber(active.unique_orders)}</Numeric></dd></dl>
+      </div>}
+    </div>
+    <div className="scatter-legend"><span><i className="scatter-positive"/>{t.positiveProfit}</span><span><i className="scatter-negative"/>{t.loss}</span></div>
+    <p className="chart-note" dir={t.chartDirection}>{t.scatterNote}</p>
+  </div>;
 }
 
 export function LossTable({ rows, t }: { rows: State[]; t: Messages }) {
