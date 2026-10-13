@@ -10,7 +10,7 @@ import { resolveMonthlyObservations, type MonthlyObservation } from "@/lib/month
 import { Filters } from "./filters";
 import { Numeric } from "./charts";
 import { Reports } from "./reports";
-import { Geography, Overview, Products, Profitability, type AnnualComparison, type ViewId } from "./views";
+import { Geography, Overview, Products, Profitability, type ViewId } from "./views";
 
 export function Dashboard() {
   const [language,setLanguage]=useState<Language>("fa");
@@ -18,9 +18,7 @@ export function Dashboard() {
   const [metadata,setMetadata]=useState<MetadataResponse|null>(null);
   const [data,setData]=useState<DashboardResponse|null>(null);
   const [draft,setDraft]=useState<DashboardFilters>(freshFilters);
-  const [annual,setAnnual]=useState<AnnualComparison|null>(null);
   const [monthly,setMonthly]=useState<MonthlyObservation[]>([]);
-  const [annualError,setAnnualError]=useState(false);
   const [loading,setLoading]=useState(true);
   const [error,setError]=useState<string|null>(null);
   const [connectionError,setConnectionError]=useState(false);
@@ -47,7 +45,7 @@ export function Dashboard() {
     controller.current?.abort();
     const abort=new AbortController(); controller.current=abort;
     const version=++generation.current;
-    setLoading(true);setError(null);setAnnualError(false);setImages([]);
+    setLoading(true);setError(null);setImages([]);
     objectUrls.current.forEach(url=>URL.revokeObjectURL(url));objectUrls.current=[];
     try {
       if(initial) {
@@ -57,22 +55,9 @@ export function Dashboard() {
       }
       const result=await request(filters,abort.signal);
       const observedMonths=await resolveMonthlyObservations(result,abort.signal,request);
-      let comparison:AnnualComparison|null=null;
-      if(isBaseline(filters)) {
-        try {
-          const [previous,current]=await Promise.all([
-            request({...freshFilters(),years:[2016]},abort.signal),
-            request({...freshFilters(),years:[2017]},abort.signal),
-          ]);
-          comparison={previous:previous.kpis.total_profit,current:current.kpis.total_profit};
-        } catch {
-          if(abort.signal.aborted) return;
-          setAnnualError(true);
-        }
-      }
       // پاسخ قبلی نمی‌تواند نتیجهٔ یک انتخاب جدید را روی صفحه بازنویسی کند.
       if(version!==generation.current || abort.signal.aborted) return;
-      setData(result);setMonthly(observedMonths);setAnnual(comparison);setConnectionError(false);
+      setData(result);setMonthly(observedMonths);setConnectionError(false);
     } catch(caught) {
       if(abort.signal.aborted || version!==generation.current) return;
       setError(caught instanceof Error?caught.message:"Request failed");setConnectionError(true);setData(null);
@@ -105,7 +90,7 @@ export function Dashboard() {
       <div className="header-actions">
         {connectionError&&<span className="connection-error" role="status" title={t.connectionError}><span/> {t.connection}</span>}
         <div className="language-control" aria-label={t.language}><button disabled={exporting} onClick={()=>{setLanguage("fa");setImages([]);}} className={language==="fa"?"active":""} aria-pressed={language==="fa"}>فارسی</button><button disabled={exporting} onClick={()=>{setLanguage("en");setImages([]);}} className={language==="en"?"active":""} aria-pressed={language==="en"}>English</button></div>
-        <button className="button primary" onClick={()=>void exportReport()} disabled={!data||disabled||annualError}><Download size={18} aria-hidden/>{exporting?t.exporting:t.export}</button>
+        <button className="button primary" onClick={()=>void exportReport()} disabled={!data||disabled}><Download size={18} aria-hidden/>{exporting?t.exporting:t.export}</button>
       </div>
     </header>
     {metadata&&<Filters metadata={metadata} draft={draft} applied={applied} setDraft={setDraft} apply={()=>void load(draft)} reset={()=>{const reset=freshFilters();setDraft(reset);void load(reset,!metadata);}} busy={disabled} t={t}/>}
@@ -113,10 +98,9 @@ export function Dashboard() {
     {exportError&&<p className="error-banner" role="alert">{t.exportFailed}</p>}
     {images.length>0&&<section className="download-panel" aria-label={t.reportReady}><p>{t.exportDone}</p>{images.map(image=><a className="button" key={image.filename} href={image.url} download={image.filename}>{t.download} <bdi dir="ltr">{image.filename}</bdi></a>)}</section>}
     {loading?<div className="loading" role="status"><p>{t.loading}</p><div className="skeleton-kpis">{Array.from({length:4},(_,i)=><div key={i}/>)}</div></div>:error?<div className="error-banner" role="alert"><p>{t.error}</p><button className="button" onClick={()=>void load(draft,true)}><RefreshCw size={16} aria-hidden/>{t.retry}</button></div>:data&&<>
-      {annualError&&<p className="error-banner" role="alert">{t.findingError} <button className="button" onClick={()=>void load(applied)}>{t.retry}</button></p>}
-      {view==="overview"?<Overview data={data} monthly={monthly} baseline={isBaseline(applied)} annual={annual} t={t}/>:view==="products"?<Products data={data} t={t}/>:view==="profitability"?<Profitability data={data} t={t}/>:<Geography key={filterKey(applied)} data={data} baseline={isBaseline(applied)} t={t}/>}
+      {view==="overview"?<Overview data={data} monthly={monthly} baseline={isBaseline(applied)} t={t}/>:view==="products"?<Products data={data} t={t}/>:view==="profitability"?<Profitability data={data} t={t}/>:<Geography key={filterKey(applied)} data={data} baseline={isBaseline(applied)} t={t}/>}
       <footer className="page-footer">{t.source}: <bdi dir="ltr">superstore-sales.csv</bdi> · <Numeric>{data.filtered_rows.toLocaleString("en-US")}</Numeric> {t.observations}</footer>
-      {metadata&&<Reports data={data} monthly={monthly} filters={applied} metadata={metadata} language={language} annual={annual}/>}
+      {metadata&&<Reports data={data} monthly={monthly} filters={applied} metadata={metadata} language={language}/>}
     </>}
   </main>;
 }

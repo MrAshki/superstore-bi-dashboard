@@ -78,6 +78,8 @@ summary::-webkit-details-marker { display:none; }
 .kpi strong { font-size:34px; font-weight:750; line-height:1.3; display:block; }
 .findings { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
 .findings article { padding:14px 18px; background:var(--card); border:1px solid var(--border); border-inline-start:3px solid var(--profit); border-radius:8px; }
+.findings article.finding-alert { background:#FFF7F7; border-inline-start-color:var(--loss); }
+.findings article.finding-focus { background:#FFFBEB; border-inline-start-color:#D97706; }
 .findings h2 { font-size:16px; margin:0 0 5px; }
 .findings p { margin:0; font-size:14px; color:var(--muted); }
 .monthly-stack { display:grid; gap:12px; }

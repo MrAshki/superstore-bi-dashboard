@@ -7,7 +7,6 @@ import { interpolate, type Messages } from "@/lib/i18n";
 import type { MonthlyObservation } from "@/lib/monthly";
 import { Card, DiscountBandComparison, Empty, FurnitureStateLossTable, Kpis, LossTable, MonthlyCharts, Numeric, ProfitabilityKpis, ProfitBridge, ProfitComparison, StateMap, StateScatter, SubcategoryDiscountChart } from "./charts";
 
-export type AnnualComparison = { previous: number; current: number };
 export type ViewId = "overview" | "products" | "profitability" | "geography";
 
 function FindingText({template,values}:{template:string;values:Record<string,string>}) {
@@ -17,19 +16,19 @@ function FindingText({template,values}:{template:string;values:Record<string,str
   })}</p>;
 }
 
-export function Findings({ data, annual, t }: {data:DashboardResponse;annual:AnnualComparison|null;t:Messages}) {
-  const furniture = data.categories.find(row=>row.category==="Furniture");
-  const tables = data.subcategories.find(row=>row.subcategory==="Tables");
-  const bookcases = data.subcategories.find(row=>row.subcategory==="Bookcases");
+export function Findings({ data, t }: {data:DashboardResponse;t:Messages}) {
+  const lowDiscount=data.profitability.discount_bands.find(row=>row.discount_band==="up_to_20");
+  const highDiscount=data.profitability.discount_bands.find(row=>row.discount_band==="above_20");
+  const erosion=lowDiscount && lowDiscount.profit>0 && highDiscount ? Math.abs(highDiscount.profit)/lowDiscount.profit*100 : null;
   return <div className="findings">
-    {furniture && tables && bookcases && <article><h2>{t.furnitureTitle}</h2><FindingText template={t.furnitureText} values={{sales:formatCurrency(furniture.sales),profit:formatCurrency(furniture.profit),margin:formatPercent(furniture.profit_margin),loss:formatCurrency(tables.profit+bookcases.profit)}}/></article>}
-    {annual && <article><h2>{t.annualTitle}</h2><FindingText template={t.annualText} values={{previous:formatCurrency(annual.previous),current:formatCurrency(annual.current),decline:formatCurrency(annual.previous-annual.current)}}/></article>}
+    {lowDiscount && highDiscount && <article className="finding-alert"><h2>{t.discountRiskTitle}</h2><FindingText template={t.discountRiskText} values={{salesShare:formatPercent(data.profitability.kpis.high_discount_sales_share),highLoss:formatCurrency(highDiscount.profit),erosion:formatPercent(erosion)}}/></article>}
+    {data.profitability.kpis.top_10_loss_share!==null && <article className="finding-focus"><h2>{t.lossFocusTitle}</h2><FindingText template={t.lossFocusText} values={{concentration:formatPercent(data.profitability.kpis.top_10_loss_share)}}/></article>}
   </div>;
 }
 
-export function Overview({data,monthly,baseline,annual,t}:{data:DashboardResponse;monthly:MonthlyObservation[];baseline:boolean;annual:AnnualComparison|null;t:Messages}) {
+export function Overview({data,monthly,baseline,t}:{data:DashboardResponse;monthly:MonthlyObservation[];baseline:boolean;t:Messages}) {
   return <div className="view-content overview-view"><Kpis data={data} t={t} />
-    {baseline && <Findings data={data} annual={annual} t={t}/>}
+    {baseline && <Findings data={data} t={t}/>}
     <Card title={t.monthly}><MonthlyCharts rows={monthly} t={t}/></Card>
     <div className="comparison-grid">
       <Card title={t.categoryProfit}><ProfitComparison rows={data.categories.map(row=>({...row,name:row.category}))} t={t}/></Card>
